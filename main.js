@@ -19,33 +19,24 @@ const contractABI = [
     {"inputs":[{"internalType":"bytes32","name":"_txHash","type":"bytes32"}],"name":"pong","outputs":[],"stateMutability":"nonpayable","type":"function"}
 ];
 
-const sepoliatAlchemySocketEndpoint = 'wss://eth-sepolia.g.alchemy.com/v2/t3E1RmG-Yiz3FxF5hKvHh7G8ACq9w96W';
-const sepoliaContractAddress = '0x487e2deE36f90677329dBc6834F11587c8D43AcE';
-
 const web3Goerli = new Web3(new Web3.providers.WebsocketProvider(process.env.GOERLI_ALCHEMY_ENDPOINT));
 const web3Sepolia = new Web3(new Web3.providers.HttpProvider(process.env.SEPOLIA_ALCHEMY_ENDPOINT));
-const web3SepoliaSocket = new Web3(new Web3.providers.WebsocketProvider(sepoliatAlchemySocketEndpoint))
 
 const goerliContract = new web3Goerli.eth.Contract(contractABI, process.env.GOERLI_CONTRACT_ADDRESS);
 const sepoliaContract = new web3Sepolia.eth.Contract(contractABI, process.env.SEPOLIA_CONTRACT_ADDRESS);
-const sepoliaSocketContract = new web3SepoliaSocket.eth.Contract(contractABI, sepoliaContractAddress);
 
 (async function() {
     const pings = [];
-    const transactionErrors = {};
-    transactionErrors['g'] = 5;
     await connectToDB();
     const fromBlock = await getLatestBlockNumber();
-    console.log('from block', fromBlock)
-    // const subscription = goerliContract.events.Ping({
-    //     fromBlock
-    // });
-    const subscription = sepoliaSocketContract.events.Ping({
+    console.log(`listening from block : ${fromBlock}`)
+
+    const subscription = goerliContract.events.Ping({
         fromBlock
     });
 
     subscription.on("connected", ()=>{
-        console.log('connected to eth event');
+        console.log('connected to eth events');
     });
 
     subscription.on('data', (event)=>{
@@ -56,12 +47,10 @@ const sepoliaSocketContract = new web3SepoliaSocket.eth.Contract(contractABI, se
     setTimeout(handlePongEvent, 1000);
 
     async function handlePongEvent(){
-        console.log(transactionErrors.g)
-        console.log('handling pong')
         try{
-            const nonce = await getNonce();
             const earliestEvent = await getEarliestEvent();
             if(earliestEvent){
+                const nonce = await getNonce();
                 await sendPongEvent(earliestEvent.transactionHash, nonce);
                 await resolvePingData(earliestEvent.transactionHash);
             }
