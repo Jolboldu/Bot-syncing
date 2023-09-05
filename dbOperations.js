@@ -1,10 +1,11 @@
 import { MongoClient } from 'mongodb';
+import 'dotenv/config'
 
-const MONGODB_URI = 'mongodb://username:password@localhost:27017/';
-const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const uri = process.env.MONGODB_URI
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const startingBlock = process.env.STARTING_BLOCK;
 let db;
 let pingCollection;
-const startingBlock = 8824729;
 
 async function connectToDB() {
     await client.connect();
