@@ -4,7 +4,7 @@ const MONGODB_URI = 'mongodb://username:password@localhost:27017/';
 const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 let db;
 let pingCollection;
-const startingBlock = 8824326;
+const startingBlock = 8824729;
 
 async function connectToDB() {
     await client.connect();
@@ -28,11 +28,6 @@ async function getLatestBlockNumber() {
     return latestEvent.length > 0 ? latestEvent[0].blockNumber + 1 : startingBlock;
 }
 
-async function getNonce() {
-    const count = await pingCollection.countDocuments({ type: { $ne: 'new' } })
-    return  count + 1;
-}
-
 async function getEarliestEvent() {
     const earliestEvent = await pingCollection.find({type:{$eq:'new'}}).sort({ blockNumber: 1 }).limit(1).toArray();
     return earliestEvent[0];
@@ -42,7 +37,6 @@ export {
     connectToDB, 
     resolvePingData, 
     getLatestBlockNumber, 
-    getNonce, 
     getEarliestEvent,
     insertManyPingData
 };

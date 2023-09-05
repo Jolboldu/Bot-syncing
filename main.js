@@ -3,7 +3,6 @@ import {
     connectToDB,  
     resolvePingData, 
     getLatestBlockNumber, 
-    getNonce, 
     getEarliestEvent,
     insertManyPingData
 } from './dbOperations.js'; 
@@ -50,8 +49,7 @@ const sepoliaContract = new web3Sepolia.eth.Contract(contractABI, process.env.SE
         try{
             const earliestEvent = await getEarliestEvent();
             if(earliestEvent){
-                const nonce = await getNonce();
-                await sendPongEvent(earliestEvent.transactionHash, nonce);
+                await sendPongEvent(earliestEvent.transactionHash);
                 await resolvePingData(earliestEvent.transactionHash);
             }
         } catch(e){
@@ -74,8 +72,8 @@ const sepoliaContract = new web3Sepolia.eth.Contract(contractABI, process.env.SE
     
 })();
 
-async function sendPongEvent(tnxHash, nonce){
-    console.log(`sending pong with tnx: ${tnxHash}, nonce: ${nonce}`)
+async function sendPongEvent(tnxHash){
+    console.log(`sending pong with tnx: ${tnxHash}`)
     const baseGasPrice = await web3Sepolia.eth.getGasPrice();
     const gasLimit = await sepoliaContract.methods.pong(tnxHash).estimateGas({ from: process.env.WALLET_ADDRESS });
     const gasLimitWithBuffer = gasLimit * 2n;
@@ -87,15 +85,14 @@ async function sendPongEvent(tnxHash, nonce){
         value:0,
         gas: gasLimitWithBuffer,
         gasPrice: adjustedGasPrice,
-        to: process.env.SEPOLIA_CONTRACT_ADDRESS,
-        nonce
+        to: process.env.SEPOLIA_CONTRACT_ADDRESS
     };
 
     const signedTx = await web3Sepolia.eth.accounts.signTransaction(tx, process.env.WALLET_PRIVATE_KEY);
     // Send the transaction
     try{
         const sent = await web3Sepolia.eth.sendSignedTransaction(signedTx.rawTransaction);
-        console.log(`sent: ${sent}`)
+        console.log('sent', sent);
         return sent;
     }catch(e){
         console.log(`something went wrong during pong: ${e}`)
