@@ -29,6 +29,6 @@ Address of the bot = 0xEd94590f919D2ac96D5c3C955b737EB433939Eb6
 
 Address of the sepolia contract = 0xa5fBd3C1Fbf755a75f1e6DBE1f1Cbd58630051e4
 
-Contract eatherscan link = https://sepolia.etherscan.io/address/0xa5fbd3c1fbf755a75f1e6dbe1f1cbd58630051e4
+Contract etherscan link = https://sepolia.etherscan.io/address/0xa5fbd3c1fbf755a75f1e6dbe1f1cbd58630051e4
 
 Starting block number = 8824729
